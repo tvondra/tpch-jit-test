@@ -1,0 +1,264 @@
+set max_parallel_maintenance_workers = 0;
+SET
+set max_parallel_workers_per_gather = 0;
+SET
+set maintenance_work_mem = 262144;
+SET
+Timing is on.
+Timing is on.
+BEGIN;
+BEGIN
+Time: 0.122 ms
+CREATE TABLE PART (
+	P_PARTKEY		SERIAL,
+	P_NAME			VARCHAR(55),
+	P_MFGR			CHAR(25),
+	P_BRAND			CHAR(10),
+	P_TYPE			VARCHAR(25),
+	P_SIZE			INTEGER,
+	P_CONTAINER		CHAR(10),
+	P_RETAILPRICE	DECIMAL,
+	P_COMMENT		VARCHAR(23)
+);
+CREATE TABLE
+Time: 2.673 ms
+CREATE TABLE SUPPLIER (
+	S_SUPPKEY		SERIAL,
+	S_NAME			CHAR(25),
+	S_ADDRESS		VARCHAR(40),
+	S_NATIONKEY		INTEGER NOT NULL, -- references N_NATIONKEY
+	S_PHONE			CHAR(15),
+	S_ACCTBAL		DECIMAL,
+	S_COMMENT		VARCHAR(101)
+);
+CREATE TABLE
+Time: 1.111 ms
+CREATE TABLE PARTSUPP (
+	PS_PARTKEY		INTEGER NOT NULL, -- references P_PARTKEY
+	PS_SUPPKEY		INTEGER NOT NULL, -- references S_SUPPKEY
+	PS_AVAILQTY		INTEGER,
+	PS_SUPPLYCOST	DECIMAL,
+	PS_COMMENT		VARCHAR(199)
+);
+CREATE TABLE
+Time: 0.675 ms
+CREATE TABLE CUSTOMER (
+	C_CUSTKEY		SERIAL,
+	C_NAME			VARCHAR(25),
+	C_ADDRESS		VARCHAR(40),
+	C_NATIONKEY		INTEGER NOT NULL, -- references N_NATIONKEY
+	C_PHONE			CHAR(15),
+	C_ACCTBAL		DECIMAL,
+	C_MKTSEGMENT	CHAR(10),
+	C_COMMENT		VARCHAR(117)
+);
+CREATE TABLE
+Time: 1.061 ms
+CREATE TABLE ORDERS (
+	O_ORDERKEY		SERIAL,
+	O_CUSTKEY		INTEGER NOT NULL, -- references C_CUSTKEY
+	O_ORDERSTATUS	CHAR(1),
+	O_TOTALPRICE	DECIMAL,
+	O_ORDERDATE		DATE,
+	O_ORDERPRIORITY	CHAR(15),
+	O_CLERK			CHAR(15),
+	O_SHIPPRIORITY	INTEGER,
+	O_COMMENT		VARCHAR(79)
+);
+CREATE TABLE
+Time: 1.027 ms
+CREATE TABLE LINEITEM (
+	L_ORDERKEY		INTEGER NOT NULL, -- references O_ORDERKEY
+	L_PARTKEY		INTEGER NOT NULL, -- references P_PARTKEY (compound fk to PARTSUPP)
+	L_SUPPKEY		INTEGER NOT NULL, -- references S_SUPPKEY (compound fk to PARTSUPP)
+	L_LINENUMBER	INTEGER,
+	L_QUANTITY		DECIMAL,
+	L_EXTENDEDPRICE	DECIMAL,
+	L_DISCOUNT		DECIMAL,
+	L_TAX			DECIMAL,
+	L_RETURNFLAG	CHAR(1),
+	L_LINESTATUS	CHAR(1),
+	L_SHIPDATE		DATE,
+	L_COMMITDATE	DATE,
+	L_RECEIPTDATE	DATE,
+	L_SHIPINSTRUCT	CHAR(25),
+	L_SHIPMODE		CHAR(10),
+	L_COMMENT		VARCHAR(44)
+);
+CREATE TABLE
+Time: 0.760 ms
+CREATE TABLE NATION (
+	N_NATIONKEY		SERIAL,
+	N_NAME			CHAR(25),
+	N_REGIONKEY		INTEGER NOT NULL,  -- references R_REGIONKEY
+	N_COMMENT		VARCHAR(152)
+);
+CREATE TABLE
+Time: 0.686 ms
+CREATE TABLE REGION (
+	R_REGIONKEY	SERIAL,
+	R_NAME		CHAR(25),
+	R_COMMENT	VARCHAR(152)
+);
+CREATE TABLE
+Time: 0.589 ms
+COPY part FROM '/mnt/data/tpch/10/part.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 2000000
+Time: 4228.826 ms (00:04.229)
+COPY region FROM '/mnt/data/tpch/10/region.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 5
+Time: 0.579 ms
+COPY nation FROM '/mnt/data/tpch/10/nation.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 25
+Time: 0.379 ms
+COPY supplier FROM '/mnt/data/tpch/10/supplier.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 100000
+Time: 219.037 ms
+COPY customer FROM '/mnt/data/tpch/10/customer.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 1500000
+Time: 3605.943 ms (00:03.606)
+COPY partsupp FROM '/mnt/data/tpch/10/partsupp.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 8000000
+Time: 16914.816 ms (00:16.915)
+COPY orders FROM '/mnt/data/tpch/10/orders.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 15000000
+Time: 35851.788 ms (00:35.852)
+COPY lineitem FROM '/mnt/data/tpch/10/lineitem.csv' WITH (FORMAT csv, DELIMITER '|');
+COPY 59986052
+Time: 201189.413 ms (03:21.189)
+ALTER TABLE lineitem ALTER l_orderkey SET (n_distinct = -0.25);
+ALTER TABLE
+Time: 0.269 ms
+COMMIT;
+COMMIT
+Time: 5.749 ms
+VACUUM ANALYZE;
+VACUUM
+Time: 29871.807 ms (00:29.872)
+ALTER TABLE PART ADD PRIMARY KEY (P_PARTKEY);
+ALTER TABLE
+Time: 874.071 ms
+ALTER TABLE SUPPLIER ADD PRIMARY KEY (S_SUPPKEY);
+ALTER TABLE
+Time: 34.140 ms
+ALTER TABLE PARTSUPP ADD PRIMARY KEY (PS_PARTKEY, PS_SUPPKEY);
+ALTER TABLE
+Time: 4079.148 ms (00:04.079)
+ALTER TABLE CUSTOMER ADD PRIMARY KEY (C_CUSTKEY);
+ALTER TABLE
+Time: 920.198 ms
+ALTER TABLE ORDERS ADD PRIMARY KEY (O_ORDERKEY);
+ALTER TABLE
+Time: 6173.584 ms (00:06.174)
+ALTER TABLE LINEITEM ADD PRIMARY KEY (L_ORDERKEY, L_LINENUMBER);
+ALTER TABLE
+Time: 34191.477 ms (00:34.191)
+ALTER TABLE NATION ADD PRIMARY KEY (N_NATIONKEY);
+ALTER TABLE
+Time: 1.115 ms
+ALTER TABLE REGION ADD PRIMARY KEY (R_REGIONKEY);
+ALTER TABLE
+Time: 1.101 ms
+CREATE INDEX IDX_SUPPLIER_NATION_KEY ON SUPPLIER (S_NATIONKEY);
+CREATE INDEX
+Time: 48.631 ms
+CREATE INDEX IDX_PARTSUPP_PARTKEY ON PARTSUPP (PS_PARTKEY);
+CREATE INDEX
+Time: 3252.896 ms (00:03.253)
+CREATE INDEX IDX_PARTSUPP_SUPPKEY ON PARTSUPP (PS_SUPPKEY);
+CREATE INDEX
+Time: 4242.921 ms (00:04.243)
+CREATE INDEX IDX_CUSTOMER_NATIONKEY ON CUSTOMER (C_NATIONKEY);
+CREATE INDEX
+Time: 886.720 ms
+CREATE INDEX IDX_ORDERS_CUSTKEY ON ORDERS (O_CUSTKEY);
+CREATE INDEX
+Time: 8928.188 ms (00:08.928)
+CREATE INDEX IDX_LINEITEM_ORDERKEY ON LINEITEM (L_ORDERKEY);
+CREATE INDEX
+Time: 24033.603 ms (00:24.034)
+CREATE INDEX IDX_LINEITEM_PART_SUPP ON LINEITEM (L_PARTKEY,L_SUPPKEY);
+CREATE INDEX
+Time: 40211.178 ms (00:40.211)
+CREATE INDEX IDX_NATION_REGIONKEY ON NATION (N_REGIONKEY);
+CREATE INDEX
+Time: 1.097 ms
+CREATE INDEX IDX_LINEITEM_SHIPDATE ON LINEITEM (L_SHIPDATE, L_DISCOUNT, L_QUANTITY);
+CREATE INDEX
+Time: 123191.084 ms (02:03.191)
+CREATE INDEX IDX_ORDERS_ORDERDATE ON ORDERS (O_ORDERDATE);
+CREATE INDEX
+Time: 10186.077 ms (00:10.186)
+VACUUM FREEZE;
+VACUUM
+Time: 39596.532 ms (00:39.597)
+VACUUM ANALYZE;
+VACUUM
+Time: 2249.245 ms (00:02.249)
+set max_parallel_maintenance_workers = 0;
+SET
+set max_parallel_workers_per_gather = 0;
+SET
+set maintenance_work_mem = 262144;
+SET
+Timing is on.
+CREATE INDEX q2_idx_1 ON part (p_partkey, p_size, p_type, p_mfgr);
+CREATE INDEX
+Time: 1598.745 ms (00:01.599)
+CREATE INDEX q2_idx_2 ON partsupp (ps_partkey, ps_suppkey, ps_supplycost);
+CREATE INDEX
+Time: 4355.443 ms (00:04.355)
+CREATE INDEX q2_idx_3 ON supplier (s_suppkey, s_nationkey, s_acctbal, s_address, s_phone, s_comment);
+CREATE INDEX
+Time: 99.755 ms
+CREATE INDEX q4_idx_1 ON lineitem (l_orderkey) WHERE (l_commitdate < l_receiptdate);
+CREATE INDEX
+Time: 21814.056 ms (00:21.814)
+CREATE INDEX q5_idx_1 ON lineitem (l_orderkey, l_suppkey, l_extendedprice, l_discount);
+CREATE INDEX
+Time: 40933.705 ms (00:40.934)
+CREATE INDEX q8_idx_1 ON lineitem (l_partkey, l_orderkey, l_suppkey, l_extendedprice, l_discount);
+CREATE INDEX
+Time: 58960.881 ms (00:58.961)
+CREATE INDEX q9_idx_1 ON lineitem (l_partkey, l_suppkey, l_orderkey, l_extendedprice, l_discount, l_quantity);
+CREATE INDEX
+Time: 63215.279 ms (01:03.215)
+CREATE INDEX q10_idx_1 ON customer (c_custkey, c_nationkey, c_name, c_acctbal, c_phone, c_address, c_comment);
+CREATE INDEX
+Time: 2625.219 ms (00:02.625)
+CREATE INDEX q10_idx_2 ON lineitem (l_orderkey, l_returnflag, l_extendedprice, l_discount);
+CREATE INDEX
+Time: 54082.859 ms (00:54.083)
+CREATE INDEX q12_idx_1 ON lineitem (l_orderkey, l_shipmode, l_receiptdate) WHERE (l_commitdate < l_receiptdate) AND (l_shipdate < l_commitdate);
+CREATE INDEX
+Time: 17640.034 ms (00:17.640)
+CREATE INDEX q14_idx_1 ON lineitem (l_partkey, l_shipdate, l_extendedprice, l_discount);
+CREATE INDEX
+Time: 54354.179 ms (00:54.354)
+CREATE INDEX q17_idx_1 ON lineitem (l_partkey, l_quantity);
+CREATE INDEX
+Time: 57888.725 ms (00:57.889)
+CREATE INDEX q18_idx_1 ON lineitem (l_orderkey, l_quantity);
+CREATE INDEX
+Time: 40282.824 ms (00:40.283)
+CREATE INDEX q19_idx_1 ON lineitem (l_partkey, l_shipmode, l_shipinstruct, l_quantity, l_extendedprice, l_discount);
+CREATE INDEX
+Time: 107879.382 ms (01:47.879)
+CREATE INDEX q20_idx_1 ON partsupp (ps_partkey, ps_suppkey, ps_availqty);
+CREATE INDEX
+Time: 5523.680 ms (00:05.524)
+CREATE INDEX q20_idx_2 ON part (p_partkey, p_name);
+CREATE INDEX
+Time: 1034.683 ms (00:01.035)
+CREATE INDEX q21_idx_1 ON lineitem (l_orderkey, l_receiptdate, l_suppkey, l_commitdate);
+CREATE INDEX
+Time: 42937.695 ms (00:42.938)
+CREATE INDEX q21_idx_2 ON lineitem (l_orderkey, l_suppkey) WHERE (l_receiptdate > l_commitdate);
+CREATE INDEX
+Time: 29175.666 ms (00:29.176)
+CREATE INDEX q21_idx_3 ON orders (o_orderkey, o_orderstatus);
+CREATE INDEX
+Time: 7419.348 ms (00:07.419)
+ANALYZE;
+ANALYZE
+Time: 3247.461 ms (00:03.247)
